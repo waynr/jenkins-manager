@@ -21,10 +21,6 @@ from jenkins_manager.cli.subcommands import base
 import jenkins_manager.loader
 
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
 class DeploySubCommand(base.SubCommandBase):
 
     def parse_args(self, parser):
@@ -42,10 +38,17 @@ class DeploySubCommand(base.SubCommandBase):
             nargs='?',
             default=None,
         )
+        deploy.add_argument(
+            'library_path',
+            nargs='?',
+            default=None,
+        )
 
     def execute(self, config):
         module_path = config.arguments['module_path'].split(os.pathsep)
+        library_path = config.arguments['library_path'].split(os.pathsep)
         logging.info(module_path)
+        logging.info(library_path)
 
-        loader = jenkins_manager.loader.PythonLoader(module_path)
+        loader = jenkins_manager.loader.PythonLoader(module_path, library_path)
         logging.debug(loader.jobs)

@@ -22,8 +22,10 @@ import sys
 from stevedore import extension
 
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logging.basicConfig(
+    format='%(levelname)s:%(module)s:%(message)s',
+    level=logging.INFO,
+)
 
 
 class JMConfig(object):
@@ -44,6 +46,14 @@ class Jankman(object):
     def __init__(self, args):
         parser = self.create_parser()
         arguments = parser.parse_args(args)
+
+        if (arguments.log_level is not None):
+            arguments.log_level = getattr(logging,
+                                          arguments.log_level.upper(),
+                                          'INFO')
+            logger = logging.getLogger()
+            logger.setLevel(arguments.log_level)
+            logging.debug("hello")
 
         self.jm_config = JMConfig(vars(arguments))
 
@@ -86,7 +96,7 @@ class Jankman(object):
         # )
 
         subparser = parser.add_subparsers(
-            #help='deploy jenkins configuration',
+            # help='deploy jenkins configuration',
             dest='command'
         )
 

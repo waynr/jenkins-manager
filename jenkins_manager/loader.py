@@ -15,17 +15,12 @@
 # Job loading classes
 
 import collections
-import imp
 import importlib
 import inspect
 import logging
+import pprint
 import os
 import sys
-import traceback
-
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 def find_and_load_modules(module_path, library_path=None):
@@ -58,9 +53,14 @@ def __load_modules(module_path, library_path=None):
                     module_files.append(relative_path + "." + name)
 
     sys.path.insert(0, module_path)
+    if library_path is not None:
+        sys.path.insert(0, library_path)
 
+    logging.debug(pprint.pformat(sys.path))
     for module_file in module_files:
-        loaded_modules.append(importlib.import_module(module_file))
+        tmp = importlib.import_module(module_file)
+        logging.debug("Loaded {0}".format(tmp))
+        loaded_modules.append(tmp)
 
     # avoid accidentially prioritizing some module in the jobs module path over
     # those defined elsewhere
@@ -99,16 +99,18 @@ class PythonLoader(object):
         modules = []
         for module_path in module_paths:
             modules.extend(find_and_load_modules(module_path, library_paths))
+        return modules
 
     @property
     def modules(self):
         if self.__loaded_modules is None:
-            logger.info("Loading modules.")
+            logging.info("Loading modules from path: {0}".format(
+                self.__module_paths))
             self.__loaded_modules = self.__load_modules(
                 self.__module_paths,
                 self.__library_paths
             )
-        logger.info("Modules loaded.")
+        logging.info("Modules loaded.")
         return self.__loaded_modules
 
     def __get_jobs(self):

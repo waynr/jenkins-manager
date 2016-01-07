@@ -63,7 +63,7 @@ setuptools.setup(
         "pbr>=0.8.2,<2.0",
         "datadiff==1.1.6",
         "python-jenkins>=0.4.11,<1.0",
-        "stevedore>=1.9.0,<2.0",
+        "stevedore==1.8.0",
         "tabulate>=0.7.5,<1.0",
     ],
 
