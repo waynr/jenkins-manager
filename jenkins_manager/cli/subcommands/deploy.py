@@ -17,6 +17,10 @@
 import logging
 import os
 
+import jenkins_jobs.xml_config as xml_config
+import jenkins_jobs.registry as registry
+import jenkins_jobs.config as jjb_config
+
 from jenkins_manager.cli.subcommands import base
 import jenkins_manager.loader
 
@@ -52,3 +56,12 @@ class DeploySubCommand(base.SubCommandBase):
 
         loader = jenkins_manager.loader.PythonLoader(module_path, library_path)
         logging.debug(loader.jobs)
+
+        jjbconfig = jjb_config.JJBConfig()
+        module_registry = registry.ModuleRegistry(jjbconfig)
+        xml_generator = xml_config.XmlJobGenerator(module_registry)
+
+        xml_jobs = xml_generator.generateXML(loader.jobs)
+
+        for xml_job in xml_jobs:
+            logging.info(xml_job.output())
