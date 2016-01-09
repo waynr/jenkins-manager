@@ -53,12 +53,15 @@ class SimpleJob(Job):
 
     def __init__(self, *args, **kwargs):
         super(Job, self).__init__(*args, **kwargs)
-        self.__reify()
 
-    def __reify(self):
+    def reify(self):
         if 'name' not in self or len(self['name']) == 0:
             self['name'] = formatter.deep_format(self._name_template, self)
 
         if 'display-name' not in self or len(self['display-name']) == 0:
             self['display-name'] = formatter.deep_format(
                 self._display_name_template, self)
+
+        for key in self:
+            value = self.pop(key)
+            self[key] = formatter.deep_format(value, self)
