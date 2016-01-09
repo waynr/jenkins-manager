@@ -30,7 +30,7 @@ class Job(dict):
     """
 
     @abc.abstractmethod
-    def reify(self, extra_dict=None):
+    def reify(self, extra_dict=None, **kwargs):
         """Subclasses that define template attributes must provide an
         implementation of this function that will populate those templates with
         values available on the subclass. This method may also take an optional
