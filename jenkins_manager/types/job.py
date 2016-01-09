@@ -43,15 +43,6 @@ class JobName(object):
 
 class SimpleJob(Job):
 
-    _name_template = '{value-stream}__{project-name}__{qualifier}'
-    _display_name_template = '({project-name})'
-
-    template_keys = [
-        'project-name',
-        'value-stream',
-        'qualifier',
-    ]
-
     def __init__(self, *args, **kwargs):
         super(Job, self).__init__(*args, **kwargs)
 
@@ -59,15 +50,6 @@ class SimpleJob(Job):
         dictcopy = copy.deepcopy(self)
         if override_dict is not None:
             dictcopy.update(override_dict)
-
-        if 'name' not in dictcopy or len(dictcopy['name']) == 0:
-            self['name'] = formatter.deep_format(
-                self._name_template, dictcopy)
-
-        if ('display-name' not in dictcopy
-           or len(dictcopy['display-name']) == 0):
-            self['display-name'] = formatter.deep_format(
-                self._display_name_template, dictcopy)
 
         for key in self:
             value = self.pop(key)
