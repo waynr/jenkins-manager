@@ -64,3 +64,21 @@ class TestSimpleJob(testtools.TestCase):
             'name': 'puppet-server__test__master',
             'display-name': '(puppet-server) [master]',
         })
+
+    def test_reify_from_kwargs(self):
+        """ Validate that a SimpleJob instance may be reified using .reify()
+        passed keyword arguments.
+        """
+        j = job.SimpleJob({
+            'name': '{project}__test__{gitbranch}',
+            'display-name': '({project}) [{gitbranch}]',
+        })
+        j.reify(
+            project='puppet-server',
+            gitbranch='master',
+        )
+
+        self.assertEqual(j, {
+            'name': 'puppet-server__test__master',
+            'display-name': '(puppet-server) [master]',
+        })

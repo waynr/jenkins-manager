@@ -46,10 +46,13 @@ class SimpleJob(Job):
     def __init__(self, *args, **kwargs):
         super(Job, self).__init__(*args, **kwargs)
 
-    def reify(self, override_dict=None):
+    def reify(self, override_dict=None, **kwargs):
         dictcopy = copy.deepcopy(self)
+
         if override_dict is not None:
             dictcopy.update(override_dict)
+        if len(kwargs.keys()) != 0:
+            dictcopy.update(kwargs)
 
         for key in self:
             value = self.pop(key)
