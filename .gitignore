@@ -2,3 +2,6 @@
 *.egg-info
 *.pyc
 *.sw*
+
+.testrepository/
+.tox/
