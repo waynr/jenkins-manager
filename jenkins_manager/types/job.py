@@ -15,6 +15,7 @@
 # Define basic jenkins job abstractions.
 
 import abc
+import copy
 
 import six
 import jenkins_jobs.formatter as formatter
@@ -54,14 +55,22 @@ class SimpleJob(Job):
     def __init__(self, *args, **kwargs):
         super(Job, self).__init__(*args, **kwargs)
 
-    def reify(self):
-        if 'name' not in self or len(self['name']) == 0:
-            self['name'] = formatter.deep_format(self._name_template, self)
+    def reify(self, override_dict=None):
+        dictcopy = copy.deepcopy(self)
+        if override_dict is not None:
+            dictcopy.update(override_dict)
 
-        if 'display-name' not in self or len(self['display-name']) == 0:
+        if 'name' not in dictcopy or len(dictcopy['name']) == 0:
+            self['name'] = formatter.deep_format(
+                self._name_template, dictcopy)
+
+        if ('display-name' not in dictcopy
+           or len(dictcopy['display-name']) == 0):
             self['display-name'] = formatter.deep_format(
-                self._display_name_template, self)
+                self._display_name_template, dictcopy)
 
         for key in self:
             value = self.pop(key)
-            self[key] = formatter.deep_format(value, self)
+            self[key] = formatter.deep_format(value, dictcopy)
+
+        self = dictcopy
