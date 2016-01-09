@@ -15,9 +15,9 @@
 # Define basic jenkins job abstractions.
 
 import abc
-import string
 
 import six
+import jenkins_jobs.formatter as formatter
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -42,14 +42,12 @@ class JobName(object):
 
 class SimpleJob(Job):
 
-    _name_template = string.Template(
-        '${value_stream}__${project_name}__${qualifier}')
-    _display_name_template = string.Template(
-        '(${project-name})')
+    _name_template = '{value-stream}__{project-name}__{qualifier}'
+    _display_name_template = '({project-name})'
 
     template_keys = [
-        'project_name',
-        'value_stream',
+        'project-name',
+        'value-stream',
         'qualifier',
     ]
 
@@ -58,5 +56,9 @@ class SimpleJob(Job):
         self.__reify()
 
     def __reify(self):
-        if 'name' not in self or self['name']:
-            self['name'] = self._name_template.substitute(self)
+        if 'name' not in self or len(self['name']) == 0:
+            self['name'] = formatter.deep_format(self._name_template, self)
+
+        if 'display-name' not in self or len(self['display-name']) == 0:
+            self['display-name'] = formatter.deep_format(
+                self._display_name_template, self)
