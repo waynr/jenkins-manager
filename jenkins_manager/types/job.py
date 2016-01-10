@@ -66,12 +66,10 @@ class SimpleJob(Job):
             env = jinja2.Environment()
             ast = env.parse(value)
             undeclared = meta.find_undeclared_variables(ast)
-            missing_vars = []
-            for var in undeclared:
-                if var not in dictcopy:
-                    missing_vars.append(var)
 
-            if len(missing_vars) > 0:
+            missing_vars = [var for var in undeclared if var not in dictcopy]
+
+            if missing_vars:
                 raise errors.MissingTemplateVariableError(missing_vars, value)
 
             template = jinja2.Template(value)
