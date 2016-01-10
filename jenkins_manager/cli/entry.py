@@ -72,14 +72,14 @@ class Jankman(object):
             default='info',
             help="log level (default: %(default)s)"
         )
-        # parser.add_argument(
-        #     '--ignore-cache',
-        #     action='store_true',
-        #     dest='ignore_cache',
-        #     default=False,
-        #     help='ignore the cache and update the jobs anyhow (that will only '
-        #     'flush the specified jobs cache)'
-        # )
+        parser.add_argument(
+            '--use-cache',
+            action='store_true',
+            dest='use_cache',
+            default=False,
+            help='ignore the cache and update the jobs anyhow (that will only '
+            'flush the specified jobs cache)'
+        )
         # parser.add_argument(
         #     '--flush-cache',
         #     action='store_true',

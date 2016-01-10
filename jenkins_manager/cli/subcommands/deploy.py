@@ -16,9 +16,11 @@
 
 import logging
 import os
+import pprint
 
 import jenkins_jobs.xml_config as xml_config
 import jenkins_jobs.registry as registry
+import jenkins_jobs.builder as builder
 import jenkins_jobs.config as jjb_config
 
 from jenkins_manager.cli.subcommands import base
@@ -50,18 +52,25 @@ class DeploySubCommand(base.SubCommandBase):
 
     def execute(self, config):
         module_path = config.arguments['module_path'].split(os.pathsep)
-        library_path = config.arguments['library_path'].split(os.pathsep)
-        logging.info(module_path)
-        logging.info(library_path)
+
+        library_path = config.arguments['library_path']
+        if library_path is not None:
+            library_path = library_path.split(os.pathsep)
+
+        logging.debug("Module path: {0}".format(module_path))
+        logging.debug("Library path: {0}".format(library_path))
 
         loader = jenkins_manager.loader.PythonLoader(module_path, library_path)
-        logging.debug(loader.jobs)
+        logging.debug("Jobs loaded: {0}".format(pprint.pformat(loader.jobs)))
 
         jjbconfig = jjb_config.JJBConfig()
-        module_registry = registry.ModuleRegistry(jjbconfig)
+        jjbconfig.do_magical_things()
+        jjbconfig.builder['ignore_cache'] = (not config.arguments['use_cache'])
+
+        bldr = builder.Builder(jjbconfig)
+        module_registry = registry.ModuleRegistry(jjbconfig, bldr.plugins_list)
         xml_generator = xml_config.XmlJobGenerator(module_registry)
 
         xml_jobs = xml_generator.generateXML(loader.jobs)
 
-        for xml_job in xml_jobs:
-            logging.info(xml_job.output())
+        jobs, num_updated_jobs = bldr.update_jobs(xml_jobs, n_workers=1)
