@@ -39,11 +39,6 @@ class Job(dict):
         raise NotImplementedError
 
 
-class JobName(object):
-    def __init__(self, **kwargs):
-        pass
-
-
 class SimpleJob(Job):
 
     def __init__(self, *args, **kwargs):
