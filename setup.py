@@ -37,6 +37,7 @@ setuptools.setup(
         ],
         'jenkins_manager.cli.subcommands': [
             'deploy = jenkins_manager.cli.subcommands.deploy:DeploySubCommand',
+            'test = jenkins_manager.cli.subcommands.test:TestSubCommand',
         ],
     },
 

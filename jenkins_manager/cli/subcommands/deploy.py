@@ -29,28 +29,35 @@ import jenkins_manager.loader
 
 class DeploySubCommand(base.SubCommandBase):
 
+    def parse_arg_module_path(self, parser):
+        parser.add_argument(
+            'module_path',
+            help="""Colon-separated list of paths to Python modules defining
+            Jenkins jobs.
+            """,
+        )
+
+    def parse_arg_library_path(self, parser):
+        parser.add_argument(
+            'library_path',
+            help="""Colon-separated list of paths to search for user-defined
+            libraries. Note that this should only be necessary if users define
+            libraries somewhere outside the module_path.
+            """,
+            nargs='?',
+            default=None,
+        )
+
     def parse_args(self, parser):
         deploy = parser.add_parser(
             'deploy',
             help="""Deploy jobs to jenkins instances.
             """
         )
+        self.parse_arg_module_path(deploy)
+        self.parse_arg_library_path(deploy)
 
-        deploy.add_argument(
-            'module_path',
-            help="""Colon-separated list of paths to Python modules defining
-            Jenkins jobs.
-            """,
-            nargs='?',
-            default=None,
-        )
-        deploy.add_argument(
-            'library_path',
-            nargs='?',
-            default=None,
-        )
-
-    def execute(self, config):
+    def _generate_jobs(self, config):
         module_path = config.arguments['module_path'].split(os.pathsep)
 
         library_path = config.arguments['library_path']
@@ -73,4 +80,8 @@ class DeploySubCommand(base.SubCommandBase):
 
         xml_jobs = xml_generator.generateXML(loader.jobs)
 
+        return xml_jobs, bldr
+
+    def execute(self, config):
+        xml_jobs, bldr = self._generate_jobs(config)
         jobs, num_updated_jobs = bldr.update_jobs(xml_jobs, n_workers=1)
