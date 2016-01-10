@@ -27,11 +27,25 @@ import tests.base as base
 class TestTriggerParameterizedBuildPipeline(base.LoggingFixture,
                                             testtools.TestCase):
 
-    def test_initialize_empty(self):
-        """ Define the behavior of a Pipeline object when initialized without
-        any values.
+    def test_initialize_from_list(self):
+        """ Define a TestTriggerParameterizedBuildPipeline from a plain list of
+        SimpleJob objects.
         """
-        pass
+        j = job.SimpleJob({
+            "qualifier": "sweet",
+            "name": "{{project}}__{{qualifier}}",
+            "display-name": "{{project}} {{qualifier}} success",
+        })
+        h = job.SimpleJob({
+            "qualifier": "bitter",
+            "name": "{{project}}__{{qualifier}}",
+            "display-name": "{{project}} {{qualifier}} success",
+        })
+
+        p = pipeline.TriggerParameterizedBuildPipeline([j, h])
+
+        self.assertTrue((j in p))
+        self.assertTrue((h in p))
 
     def test_jobs_connected(self):
         """ Show that on reification of the TriggerParameterizedBuildPipeline

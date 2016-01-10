@@ -37,7 +37,9 @@ class Pipeline(list):
 
 class TriggerParameterizedBuildPipeline(Pipeline):
 
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        super(TriggerParameterizedBuildPipeline, self).__init__(*args,
+                                                                **kwargs)
         self.__jobs = []
         self.__reified = False
 
