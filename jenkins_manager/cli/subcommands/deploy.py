@@ -56,8 +56,6 @@ class DeploySubCommand(base.SubCommandBase):
 
         loader = jenkins_manager.loader.PythonLoader(module_path, library_path)
         logging.debug(loader.jobs)
-        for job in loader.jobs:
-            job.reify()
 
         jjbconfig = jjb_config.JJBConfig()
         module_registry = registry.ModuleRegistry(jjbconfig)
