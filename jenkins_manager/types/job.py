@@ -18,7 +18,11 @@ import abc
 import copy
 
 import jinja2
+from jinja2 import meta
 import six
+
+import jenkins_manager.errors as errors
+
 
 @six.add_metaclass(abc.ABCMeta)
 class Job(dict):
@@ -55,7 +59,22 @@ class SimpleJob(Job):
             dictcopy.update(kwargs)
 
         for key in self:
-            value = jinja2.Template(self.pop(key))
-            self[key] = value.render(dictcopy)
+            value = self.pop(key)
+
+            # Ensure that we have all the key/value pairs we need in the
+            # mapping object we are applying to the key.
+            env = jinja2.Environment()
+            ast = env.parse(value)
+            undeclared = meta.find_undeclared_variables(ast)
+            missing_vars = []
+            for var in undeclared:
+                if var not in dictcopy:
+                    missing_vars.append(var)
+
+            if len(missing_vars) > 0:
+                raise errors.MissingTemplateVariableError(missing_vars, value)
+
+            template = jinja2.Template(value)
+            self[key] = template.render(dictcopy)
 
         self = dictcopy

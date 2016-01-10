@@ -17,6 +17,7 @@
 import testtools
 
 import jenkins_manager.types.job as job
+import jenkins_manager.errors as errors
 
 
 class TestSimpleJob(testtools.TestCase):
@@ -82,3 +83,17 @@ class TestSimpleJob(testtools.TestCase):
             'name': 'puppet-server__test__master',
             'display-name': '(puppet-server) [master]',
         })
+
+    def test_reify_with_missing_vars(self):
+        """ If we are missing variables, users must be notified.
+        """
+        j = job.SimpleJob({
+            'name': '{{project}}__test__{{gitbranch}}',
+            'display-name': '({{project}}) [{{gitbranch}}]',
+        })
+
+        # We must have all variables available
+        with testtools.ExpectedException(errors.MissingTemplateVariableError):
+            j.reify(
+                project='puppet-server',
+            )
