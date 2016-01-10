@@ -17,9 +17,8 @@
 import abc
 import copy
 
+import jinja2
 import six
-import jenkins_jobs.formatter as formatter
-
 
 @six.add_metaclass(abc.ABCMeta)
 class Job(dict):
@@ -51,11 +50,12 @@ class SimpleJob(Job):
 
         if override_dict is not None:
             dictcopy.update(override_dict)
+
         if len(kwargs.keys()) != 0:
             dictcopy.update(kwargs)
 
         for key in self:
-            value = self.pop(key)
-            self[key] = formatter.deep_format(value, dictcopy)
+            value = jinja2.Template(self.pop(key))
+            self[key] = value.render(dictcopy)
 
         self = dictcopy

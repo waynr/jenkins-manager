@@ -50,13 +50,13 @@ class TestSimpleJob(testtools.TestCase):
         passed a dictionary argument.
         """
         d = {
-            'project-name': 'puppet-server',
-            'git-branch': 'master',
+            'project': 'puppet-server',
+            'gitbranch': 'master',
         }
 
         j = job.SimpleJob({
-            'name': '{project-name}__test__{git-branch}',
-            'display-name': '({project-name}) [{git-branch}]',
+            'name': '{{project}}__test__{{gitbranch}}',
+            'display-name': '({{project}}) [{{gitbranch}}]',
         })
         j.reify(d)
 
@@ -70,8 +70,8 @@ class TestSimpleJob(testtools.TestCase):
         passed keyword arguments.
         """
         j = job.SimpleJob({
-            'name': '{project}__test__{gitbranch}',
-            'display-name': '({project}) [{gitbranch}]',
+            'name': '{{project}}__test__{{gitbranch}}',
+            'display-name': '({{project}}) [{{gitbranch}}]',
         })
         j.reify(
             project='puppet-server',

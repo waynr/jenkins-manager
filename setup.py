@@ -57,6 +57,7 @@ setuptools.setup(
 
     install_requires=[
         "argparse",
+        "jinja2",
         "six>=1.5.2,<2.0",
         "stevedore==1.8.0",
     ],
