@@ -34,11 +34,10 @@ class TestTriggerParameterizedBuildPipeline(base.LoggingFixture,
             "name": "{{project}}__{{qualifier}}",
             "display-name": "{{project}} {{qualifier}} success",
         })
-        self.j2 = job.TemplateJob({
-            "qualifier": "bitter",
-            "name": "{{project}}__{{qualifier}}",
-            "display-name": "{{project}} {{qualifier}} success",
-        })
+        self.j2 = job.TemplateJob(self.j1)
+        self.j2["qualifier"] = "bitter"
+        self.j3 = job.TemplateJob(self.j2)
+        self.j3["qualifier"] = "sour"
 
     def test_initialize_from_list(self):
         """ Define a TestTriggerParameterizedBuildPipeline from a plain list of
@@ -57,16 +56,21 @@ class TestTriggerParameterizedBuildPipeline(base.LoggingFixture,
         p = pipeline.TriggerParameterizedBuildPipeline()
         p.append(self.j1)
         p.append(self.j2)
+        p.append(self.j3)
 
         p.render({
             "project": "meow",
         })
         logging.debug(pprint.pformat(p))
 
-        tpb = self.j1['publishers'][0]['trigger-parameterized-builds']
+        tpb1 = self.j1['publishers'][0]['trigger-parameterized-builds']
+        tpb2 = self.j2['publishers'][0]['trigger-parameterized-builds']
         self.assertEqual(
-            tpb[0]['project'],
+            tpb1[0]['project'],
             'meow__bitter')
+        self.assertEqual(
+            tpb2[0]['project'],
+            'meow__sour')
 
     def test_default_tpb_settings(self):
         """ Validate default Trigger Paramterized Build settings.
