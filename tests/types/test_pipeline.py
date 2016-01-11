@@ -27,72 +27,53 @@ import tests.base as base
 class TestTriggerParameterizedBuildPipeline(base.LoggingFixture,
                                             testtools.TestCase):
 
-    def test_initialize_from_list(self):
-        """ Define a TestTriggerParameterizedBuildPipeline from a plain list of
-        TemplateJob objects.
-        """
-        j = job.TemplateJob({
+    def setUp(self):
+        super(TestTriggerParameterizedBuildPipeline, self).setUp()
+        self.j1 = job.TemplateJob({
             "qualifier": "sweet",
             "name": "{{project}}__{{qualifier}}",
             "display-name": "{{project}} {{qualifier}} success",
         })
-        h = job.TemplateJob({
+        self.j2 = job.TemplateJob({
             "qualifier": "bitter",
             "name": "{{project}}__{{qualifier}}",
             "display-name": "{{project}} {{qualifier}} success",
         })
 
-        p = pipeline.TriggerParameterizedBuildPipeline([j, h])
+    def test_initialize_from_list(self):
+        """ Define a TestTriggerParameterizedBuildPipeline from a plain list of
+        TemplateJob objects.
+        """
+        p = pipeline.TriggerParameterizedBuildPipeline([self.j1, self.j2])
 
-        self.assertTrue((j in p))
-        self.assertTrue((h in p))
+        self.assertTrue((self.j1 in p))
+        self.assertTrue((self.j2 in p))
 
     def test_jobs_connected(self):
         """ Show that on reification of the TriggerParameterizedBuildPipeline
         object, successive jobs become connected using the Trigger
         Parameterized Builds Jenkins plugin.
         """
-        j = job.TemplateJob({
-            "qualifier": "sweet",
-            "name": "{{project}}__{{qualifier}}",
-            "display-name": "{{project}} {{qualifier}} success",
-        })
-        h = job.TemplateJob({
-            "qualifier": "bitter",
-            "name": "{{project}}__{{qualifier}}",
-            "display-name": "{{project}} {{qualifier}} success",
-        })
-
         p = pipeline.TriggerParameterizedBuildPipeline()
-        p.append(j)
-        p.append(h)
+        p.append(self.j1)
+        p.append(self.j2)
 
         p.render({
             "project": "meow",
         })
         logging.debug(pprint.pformat(p))
 
+        tpb = self.j1['publishers'][0]['trigger-parameterized-builds']
         self.assertEqual(
-            j['publishers'][0]['trigger-parameterized-builds'][0]['project'],
+            tpb[0]['project'],
             'meow__bitter')
 
     def test_default_tpb_settings(self):
         """ Validate default Trigger Paramterized Build settings.
         """
-        j = job.TemplateJob({
-            "qualifier": "sweet",
-            "name": "{{project}}__{{qualifier}}",
-            "display-name": "{{project}} {{qualifier}} success",
-        })
-        h = job.TemplateJob({
-            "qualifier": "bitter",
-            "name": "{{project}}__{{qualifier}}",
-            "display-name": "{{project}} {{qualifier}} success",
-        })
-
         p = pipeline.TriggerParameterizedBuildPipeline()
-        p.append(j)
-        p.append(h)
+        p.append(self.j1)
+        p.append(self.j2)
 
         p.render({
             "project": "meow",
@@ -104,7 +85,7 @@ class TestTriggerParameterizedBuildPipeline(base.LoggingFixture,
             ('trigger-with-no-params', True),
         ]
 
-        tpb_params = j.publishers[0]['trigger-parameterized-builds'][0]
+        tpb_params = self.j1.publishers[0]['trigger-parameterized-builds'][0]
         for param_name, correct_value in correct_values:
             self.assertEqual(tpb_params[param_name], correct_value)
 
@@ -112,17 +93,6 @@ class TestTriggerParameterizedBuildPipeline(base.LoggingFixture,
         """ Show that custom Trigger Parameterized Build settings can be
         defined when constructing the pipeline.
         """
-        j = job.TemplateJob({
-            "qualifier": "sweet",
-            "name": "{{project}}__{{qualifier}}",
-            "display-name": "{{project}} {{qualifier}} success",
-        })
-        h = job.TemplateJob({
-            "qualifier": "bitter",
-            "name": "{{project}}__{{qualifier}}",
-            "display-name": "{{project}} {{qualifier}} success",
-        })
-
         p = pipeline.TriggerParameterizedBuildPipeline()
 
         custom_tpb_values = [
@@ -131,13 +101,13 @@ class TestTriggerParameterizedBuildPipeline(base.LoggingFixture,
             ('trigger-with-no-params', False),
             ('property-file', 'custom.props'),
         ]
-        p.append((j, custom_tpb_values))
-        p.append(h)
+        p.append((self.j1, custom_tpb_values))
+        p.append(self.j2)
 
         p.render({
             "project": "meow",
         })
 
-        tpb_params = j.publishers[0]['trigger-parameterized-builds'][0]
+        tpb_params = self.j1.publishers[0]['trigger-parameterized-builds'][0]
         for param_name, correct_value in custom_tpb_values:
             self.assertEqual(tpb_params[param_name], correct_value)
