@@ -54,7 +54,7 @@ class TriggerParameterizedBuildPipeline(Pipeline):
         }
         if 'publishers' in upstream:
             publishers = [publisher.keys()[0]
-                          for publisher in upstream['publishers']]
+                          for publisher in upstream.publishers]
         else:
             upstream['publishers'] = [
                 {'trigger-parameterized-builds': [trigger]}
@@ -68,7 +68,7 @@ class TriggerParameterizedBuildPipeline(Pipeline):
                 break
 
         if tpb_i:
-            pub = upstream['publishers']
+            pub = upstream.publishers
             pub[tpb_i]['trigger-parameterized-builds'].append(trigger)
 
     def reify(self, override_dict=None, **kwargs):

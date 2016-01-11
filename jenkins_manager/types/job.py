@@ -29,6 +29,30 @@ class Job(dict):
     """Base class for Jenkins jobs, defines method interface
     """
 
+    valid_module_types = [
+        'builders',
+        'metadata',
+        'notifications',
+        'parameters',
+        'properties',
+        'publishers',
+        'reporters',
+        'scm',
+        'triggers',
+        'wrappers',
+    ]
+
+    def __get_module_class(self, name):
+        if hasattr(self, name):
+            return self.__getitem__(name)
+        return None
+
+    def __getattr__(self, name):
+        if name in self.valid_module_types:
+            return self.__get_module_class(name)
+
+        raise AttributeError(name)
+
     @abc.abstractmethod
     def reify(self, extra_dict=None, **kwargs):
         """Subclasses that define template attributes must provide an
@@ -42,7 +66,7 @@ class Job(dict):
 class SimpleJob(Job):
 
     def __init__(self, *args, **kwargs):
-        super(Job, self).__init__(*args, **kwargs)
+        super(SimpleJob, self).__init__(*args, **kwargs)
 
     def reify(self, override_dict=None, **kwargs):
         dictcopy = copy.deepcopy(self)
