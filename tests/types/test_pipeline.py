@@ -131,3 +131,26 @@ class TestTriggerParameterizedBuildPipeline(base.LoggingFixture,
         tpb1 = self.j1['publishers'][0]['trigger-parameterized-builds']
         self.assertTrue('meow__bitter' in tpb1[0]['project'])
         self.assertTrue('meow__sour' in tpb1[0]['project'])
+
+    def test_multiple_downstreams_followed_by_single(self):
+        """ Show that custom Trigger Parameterized Build settings can be
+        defined when constructing the pipeline.
+        """
+        j4 = job.TemplateJob(self.j3)
+        j4['qualifier'] = 'salty'
+        p = pipeline.TriggerParameterizedBuildPipeline()
+        p.append(self.j1)
+        p.append([self.j2, self.j3])
+        p.append(j4)
+
+        p.render({
+            "project": "meow",
+        })
+
+        tpb1 = self.j1['publishers'][0]['trigger-parameterized-builds']
+        tpb2 = self.j2['publishers'][0]['trigger-parameterized-builds']
+
+        self.assertTrue('meow__bitter' in tpb1[0]['project'])
+        self.assertTrue('meow__sour' in tpb1[0]['project'])
+        self.assertTrue('meow__salty' in tpb2[0]['project'])
+        self.assertTrue('publishers' not in self.j3)
