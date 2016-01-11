@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-# Test SimpleJob class.
+# Test TemplateJob class.
 
 import logging
 import pprint
@@ -29,14 +29,14 @@ class TestTriggerParameterizedBuildPipeline(base.LoggingFixture,
 
     def test_initialize_from_list(self):
         """ Define a TestTriggerParameterizedBuildPipeline from a plain list of
-        SimpleJob objects.
+        TemplateJob objects.
         """
-        j = job.SimpleJob({
+        j = job.TemplateJob({
             "qualifier": "sweet",
             "name": "{{project}}__{{qualifier}}",
             "display-name": "{{project}} {{qualifier}} success",
         })
-        h = job.SimpleJob({
+        h = job.TemplateJob({
             "qualifier": "bitter",
             "name": "{{project}}__{{qualifier}}",
             "display-name": "{{project}} {{qualifier}} success",
@@ -52,12 +52,12 @@ class TestTriggerParameterizedBuildPipeline(base.LoggingFixture,
         object, successive jobs become connected using the Trigger
         Parameterized Builds Jenkins plugin.
         """
-        j = job.SimpleJob({
+        j = job.TemplateJob({
             "qualifier": "sweet",
             "name": "{{project}}__{{qualifier}}",
             "display-name": "{{project}} {{qualifier}} success",
         })
-        h = job.SimpleJob({
+        h = job.TemplateJob({
             "qualifier": "bitter",
             "name": "{{project}}__{{qualifier}}",
             "display-name": "{{project}} {{qualifier}} success",
@@ -67,7 +67,7 @@ class TestTriggerParameterizedBuildPipeline(base.LoggingFixture,
         p.append(j)
         p.append(h)
 
-        p.reify({
+        p.render({
             "project": "meow",
         })
         logging.debug(pprint.pformat(p))

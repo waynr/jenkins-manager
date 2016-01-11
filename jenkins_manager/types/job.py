@@ -51,7 +51,7 @@ class Job(dict):
         raise AttributeError(name)
 
     @abc.abstractmethod
-    def reify(self, extra_dict=None, **kwargs):
+    def render(self, extra_dict=None, **kwargs):
         """Subclasses that define template attributes must provide an
         implementation of this function that will populate those templates with
         values available on the subclass. This method may also take an optional
@@ -60,10 +60,10 @@ class Job(dict):
         raise NotImplementedError
 
 
-class SimpleJob(Job):
+class TemplateJob(Job):
 
     def __init__(self, *args, **kwargs):
-        super(SimpleJob, self).__init__(*args, **kwargs)
+        super(TemplateJob, self).__init__(*args, **kwargs)
 
-    def reify(self, override_dict=None, **kwargs):
+    def render(self, override_dict=None, **kwargs):
         self = utils.render_dict(self, override_dict, **kwargs)
