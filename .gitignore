@@ -1,7 +1,8 @@
-.virtualenv
 *.egg-info
 *.pyc
 *.sw*
 
 .testrepository/
 .tox/
+.virtualenv/
+tmp/
