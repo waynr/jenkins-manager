@@ -14,40 +14,35 @@
 
 # Provide basic utility fuctions to share behaviour between modules.
 
-import copy
-
 import jinja2
 from jinja2 import meta
 
 import jenkins_manager.errors as errors
 
 
-def render_dict(target_dict, override_dict, **kwargs):
-    """ Use values found in target_dict, override_dict, and kwargs to populate
-    jinja2 templates in the target_dict. This operation works in-place on the
-    given target_dict.
+def render_dict(obj, param_dict):
+    """ Use values found in obj, param_dict, and kwargs to populate jinja2
+    templates in the obj. This operation works in-place on the given obj.
     """
-    dictcopy = copy.deepcopy(target_dict)
-
-    if override_dict is not None:
-        dictcopy.update(override_dict)
-
-    if len(kwargs.keys()) != 0:
-        dictcopy.update(kwargs)
-
-    for key in target_dict:
-        value = target_dict.pop(key)
-
+    if isinstance(obj, list):
+        for i, item in enumerate(obj):
+            obj[i] = render_dict(item, param_dict)
+    elif isinstance(obj, dict):
+        for item in obj:
+            obj[item] = render_dict(obj[item], param_dict)
+    elif isinstance(obj, basestring):
         # Ensure that we have all the key/value pairs we need in the
         # mapping object we are applying to the key.
         env = jinja2.Environment()
-        ast = env.parse(value)
+        ast = env.parse(obj)
         undeclared = meta.find_undeclared_variables(ast)
 
-        missing_vars = [var for var in undeclared if var not in dictcopy]
+        missing_vars = [var for var in undeclared if var not in param_dict]
 
         if missing_vars:
-            raise errors.MissingTemplateVariableError(missing_vars, value)
+            raise errors.MissingTemplateVariableError(missing_vars, obj)
 
-        template = jinja2.Template(value)
-        target_dict[key] = template.render(dictcopy)
+        template = jinja2.Template(obj)
+        return template.render(param_dict)
+
+    return obj

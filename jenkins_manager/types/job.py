@@ -15,6 +15,7 @@
 # Define basic jenkins job abstractions.
 
 import abc
+import copy
 
 import six
 
@@ -66,4 +67,11 @@ class TemplateJob(Job):
         super(TemplateJob, self).__init__(*args, **kwargs)
 
     def render(self, override_dict=None, **kwargs):
-        self = utils.render_dict(self, override_dict, **kwargs)
+        dictcopy = copy.deepcopy(self)
+        if override_dict is not None:
+            dictcopy.update(override_dict)
+
+        if len(kwargs.keys()) != 0:
+            dictcopy.update(kwargs)
+
+        return utils.render_dict(self, dictcopy)

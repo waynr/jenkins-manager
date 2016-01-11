@@ -26,7 +26,7 @@ class Pipeline(list):
     """
 
     @abc.abstractmethod
-    def render(self, override_dict=None, **kwargs):
+    def render(self, param_dict=None, **kwargs):
         """Subclasses that define template attributes must provide an
         implementation of this function that will populate those templates with
         values available on the subclass. This method may also take an optional
@@ -76,19 +76,18 @@ class TriggerParameterizedBuildPipeline(Pipeline):
             pub = upstream.publishers
             pub[tpb_i]['trigger-parameterized-builds'].append(trigger)
 
-    def __render_job(self, job, override_dict, **kwargs):
+    def __render_job(self, job, param_dict, **kwargs):
         if isinstance(job, tuple):
             job = job[0]
-        job.render(override_dict, **kwargs)
+        return job.render(param_dict, **kwargs)
 
-    def render(self, override_dict=None, **kwargs):
-
+    def render(self, param_dict=None, **kwargs):
         for obj in self:
             if isinstance(obj, list):
                 for job in obj:
-                    self.__render_job(job, override_dict, **kwargs)
+                    self.__render_job(job, param_dict, **kwargs)
                 continue
-            self.__render_job(obj, override_dict, **kwargs)
+            self.__render_job(obj, param_dict, **kwargs)
 
         # now that jobs know their names (which they may not have before if
         # they were template strings), connect them using the Trigger
