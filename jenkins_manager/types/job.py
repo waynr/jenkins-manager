@@ -15,13 +15,10 @@
 # Define basic jenkins job abstractions.
 
 import abc
-import copy
 
-import jinja2
-from jinja2 import meta
 import six
 
-import jenkins_manager.errors as errors
+from jenkins_manager import utils
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -69,29 +66,4 @@ class SimpleJob(Job):
         super(SimpleJob, self).__init__(*args, **kwargs)
 
     def reify(self, override_dict=None, **kwargs):
-        dictcopy = copy.deepcopy(self)
-
-        if override_dict is not None:
-            dictcopy.update(override_dict)
-
-        if len(kwargs.keys()) != 0:
-            dictcopy.update(kwargs)
-
-        for key in self:
-            value = self.pop(key)
-
-            # Ensure that we have all the key/value pairs we need in the
-            # mapping object we are applying to the key.
-            env = jinja2.Environment()
-            ast = env.parse(value)
-            undeclared = meta.find_undeclared_variables(ast)
-
-            missing_vars = [var for var in undeclared if var not in dictcopy]
-
-            if missing_vars:
-                raise errors.MissingTemplateVariableError(missing_vars, value)
-
-            template = jinja2.Template(value)
-            self[key] = template.render(dictcopy)
-
-        self = dictcopy
+        self = utils.render_dict(self, override_dict, **kwargs)
