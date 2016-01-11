@@ -75,3 +75,69 @@ class TestTriggerParameterizedBuildPipeline(base.LoggingFixture,
         self.assertEqual(
             j['publishers'][0]['trigger-parameterized-builds'][0]['project'],
             'meow__bitter')
+
+    def test_default_tpb_settings(self):
+        """ Validate default Trigger Paramterized Build settings.
+        """
+        j = job.TemplateJob({
+            "qualifier": "sweet",
+            "name": "{{project}}__{{qualifier}}",
+            "display-name": "{{project}} {{qualifier}} success",
+        })
+        h = job.TemplateJob({
+            "qualifier": "bitter",
+            "name": "{{project}}__{{qualifier}}",
+            "display-name": "{{project}} {{qualifier}} success",
+        })
+
+        p = pipeline.TriggerParameterizedBuildPipeline()
+        p.append(j)
+        p.append(h)
+
+        p.render({
+            "project": "meow",
+        })
+
+        correct_values = [
+            ('fail-on-missing', True),
+            ('current-parameters', True),
+            ('trigger-with-no-params', True),
+        ]
+
+        tpb_params = j.publishers[0]['trigger-parameterized-builds'][0]
+        for param_name, correct_value in correct_values:
+            self.assertEqual(tpb_params[param_name], correct_value)
+
+    def test_custom_tpb_settings(self):
+        """ Show that custom Trigger Parameterized Build settings can be
+        defined when constructing the pipeline.
+        """
+        j = job.TemplateJob({
+            "qualifier": "sweet",
+            "name": "{{project}}__{{qualifier}}",
+            "display-name": "{{project}} {{qualifier}} success",
+        })
+        h = job.TemplateJob({
+            "qualifier": "bitter",
+            "name": "{{project}}__{{qualifier}}",
+            "display-name": "{{project}} {{qualifier}} success",
+        })
+
+        p = pipeline.TriggerParameterizedBuildPipeline()
+
+        custom_tpb_values = [
+            ('fail-on-missing', False),
+            ('current-parameters', False),
+            ('trigger-with-no-params', False),
+            ('property-file', 'custom.props'),
+        ]
+        p.append((j, custom_tpb_values))
+        p.append(h)
+
+        p.render({
+            "project": "meow",
+        })
+
+        tpb_params = j.publishers[0]['trigger-parameterized-builds'][0]
+        for param_name, correct_value in custom_tpb_values:
+            self.assertEqual(tpb_params[param_name], correct_value)

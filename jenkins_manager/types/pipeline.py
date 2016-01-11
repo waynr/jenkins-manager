@@ -43,15 +43,19 @@ class TriggerParameterizedBuildPipeline(Pipeline):
         self.__jobs = []
         self.__reified = False
 
-    def __connect_jobs(self, upstream, downstream):
+    def __connect_jobs(self, upstream, downstream, extra_dict=None):
         downstream_name = downstream['name']
 
         trigger = {
-            'project': downstream_name,
             'fail-on-missing': True,
             'current-parameters': True,
             'trigger-with-no-params': True,
         }
+        if extra_dict is not None:
+            trigger.update(extra_dict)
+
+        trigger['project'] = downstream_name
+
         if 'publishers' in upstream:
             publishers = [publisher.keys()[0]
                           for publisher in upstream.publishers]
@@ -73,12 +77,18 @@ class TriggerParameterizedBuildPipeline(Pipeline):
 
     def render(self, override_dict=None, **kwargs):
         for job in self:
+            if isinstance(job, tuple):
+                job = job[0]
             job.render(override_dict, **kwargs)
 
         # now that jobs know their names (which they may not have before if
         # they were template strings), connect them using the Trigger
         # Parameterized Build plugin.
-        for i, job in enumerate(self[:-1]):
-            self.__connect_jobs(job, self.__getitem__(i + 1))
+        for i, upstream in enumerate(self[:-1]):
+            downstream = self[i + 1]
+            extra_dict = None
+            if isinstance(upstream, tuple):
+                upstream, extra_dict = upstream[:2]
+            self.__connect_jobs(upstream, downstream, extra_dict)
 
         self.__reified = True
