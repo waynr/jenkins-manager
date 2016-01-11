@@ -63,8 +63,8 @@ class TestTriggerParameterizedBuildPipeline(base.LoggingFixture,
         })
         logging.debug(pprint.pformat(p))
 
-        tpb1 = self.j1['publishers'][0]['trigger-parameterized-builds']
-        tpb2 = self.j2['publishers'][0]['trigger-parameterized-builds']
+        tpb1 = self.j1.publishers[0]['trigger-parameterized-builds']
+        tpb2 = self.j2.publishers[0]['trigger-parameterized-builds']
         self.assertEqual(
             tpb1[0]['project'],
             'meow__bitter')
@@ -128,7 +128,7 @@ class TestTriggerParameterizedBuildPipeline(base.LoggingFixture,
             "project": "meow",
         })
 
-        tpb1 = self.j1['publishers'][0]['trigger-parameterized-builds']
+        tpb1 = self.j1.publishers[0]['trigger-parameterized-builds']
         self.assertTrue('meow__bitter' in tpb1[0]['project'])
         self.assertTrue('meow__sour' in tpb1[0]['project'])
 
@@ -147,8 +147,8 @@ class TestTriggerParameterizedBuildPipeline(base.LoggingFixture,
             "project": "meow",
         })
 
-        tpb1 = self.j1['publishers'][0]['trigger-parameterized-builds']
-        tpb2 = self.j2['publishers'][0]['trigger-parameterized-builds']
+        tpb1 = self.j1.publishers[0]['trigger-parameterized-builds']
+        tpb2 = self.j2.publishers[0]['trigger-parameterized-builds']
 
         self.assertTrue('meow__bitter' in tpb1[0]['project'])
         self.assertTrue('meow__sour' in tpb1[0]['project'])
