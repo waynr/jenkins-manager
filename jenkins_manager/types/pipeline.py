@@ -44,8 +44,6 @@ class TriggerParameterizedBuildPipeline(Pipeline):
         self.__reified = False
 
     def __connect_jobs(self, upstream, downstream, extra_dict=None):
-        downstream_name = downstream['name']
-
         trigger = {
             'fail-on-missing': True,
             'current-parameters': True,
@@ -54,7 +52,10 @@ class TriggerParameterizedBuildPipeline(Pipeline):
         if extra_dict is not None:
             trigger.update(extra_dict)
 
-        trigger['project'] = downstream_name
+        if isinstance(downstream, list):
+            trigger['project'] = ','.join([job['name'] for job in downstream])
+        else:
+            trigger['project'] = downstream['name']
 
         if 'publishers' in upstream:
             publishers = [publisher.keys()[0]
@@ -75,16 +76,29 @@ class TriggerParameterizedBuildPipeline(Pipeline):
             pub = upstream.publishers
             pub[tpb_i]['trigger-parameterized-builds'].append(trigger)
 
+    def __render_job(self, job, override_dict, **kwargs):
+        if isinstance(job, tuple):
+            job = job[0]
+        job.render(override_dict, **kwargs)
+
     def render(self, override_dict=None, **kwargs):
-        for job in self:
-            if isinstance(job, tuple):
-                job = job[0]
-            job.render(override_dict, **kwargs)
+
+        for obj in self:
+            if isinstance(obj, list):
+                for job in obj:
+                    self.__render_job(job, override_dict, **kwargs)
+                continue
+            self.__render_job(obj, override_dict, **kwargs)
 
         # now that jobs know their names (which they may not have before if
         # they were template strings), connect them using the Trigger
         # Parameterized Build plugin.
-        for i, upstream in enumerate(self[:-1]):
+        for i, obj in enumerate(self[:-1]):
+            if isinstance(obj, list):
+                upstream = obj[0]
+            else:
+                upstream = obj
+
             downstream = self[i + 1]
             extra_dict = None
             if isinstance(upstream, tuple):
