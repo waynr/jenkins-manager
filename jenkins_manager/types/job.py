@@ -51,6 +51,10 @@ class Job(dict):
 
         raise AttributeError(name)
 
+    def __setattr__(self, name, value):
+        if name in self.valid_module_types:
+            self.__setitem__(name, value)
+
     @abc.abstractmethod
     def render(self, extra_dict=None, **kwargs):
         """Subclasses that define template attributes must provide an
