@@ -74,4 +74,4 @@ class TemplateJob(Job):
         if len(kwargs.keys()) != 0:
             dictcopy.update(kwargs)
 
-        return utils.render_dict(self, dictcopy)
+        return utils.render(self, dictcopy)
