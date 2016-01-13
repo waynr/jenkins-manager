@@ -70,7 +70,7 @@ class DeploySubCommand(base.SubCommandBase):
         loader = jenkins_manager.loader.PythonLoader(module_path, library_path)
         logging.debug("Jobs loaded: {0}".format(pprint.pformat(loader.jobs)))
 
-        jjbconfig = jjb_config.JJBConfig()
+        jjbconfig = jjb_config.JJBConfig(config.arguments['conf'])
         jjbconfig.do_magical_things()
         jjbconfig.builder['ignore_cache'] = (not config.arguments['use_cache'])
 

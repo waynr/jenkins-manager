@@ -63,6 +63,7 @@ class Jankman(object):
         parser.add_argument(
             '--conf',
             dest='conf',
+            default=None,
             help='configuration file'
         )
         parser.add_argument(
